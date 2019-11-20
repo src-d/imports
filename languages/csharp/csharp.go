@@ -18,6 +18,7 @@ const (
 var (
 	once sync.Once
 	q    *sitter.Query
+	qerr error
 )
 
 func init() {
@@ -35,9 +36,8 @@ func (l language) GetLanguage() *sitter.Language {
 }
 
 func (l language) Imports(content []byte, n *sitter.Node) ([]string, error) {
-	var err error
-	once.Do(func() { q, err = sitter.NewQuery([]byte(query), l.GetLanguage()) })
-	if err != nil {
+	once.Do(func() { q, qerr = sitter.NewQuery([]byte(query), l.GetLanguage()) })
+	if qerr != nil {
 		return nil, err
 	}
 
