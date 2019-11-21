@@ -4,7 +4,6 @@ import (
 	"log"
 
 	sitter "github.com/smacker/go-tree-sitter"
-	"github.com/smacker/go-tree-sitter/java" // FIXME: C#
 	"github.com/src-d/imports/languages/tsitter"
 )
 
@@ -19,7 +18,7 @@ func (language) Aliases() []string {
 }
 
 func (l language) GetLanguage() *sitter.Language {
-	return java.GetLanguage()
+	return GetLanguage()
 }
 
 func (l language) Imports(content []byte, n *sitter.Node) ([]string, error) {
