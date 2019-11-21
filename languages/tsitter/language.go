@@ -35,5 +35,21 @@ func (l language) Imports(content []byte) ([]string, error) {
 	tree := p.Parse(content)
 	out, err := l.l.Imports(content, tree.RootNode())
 	sort.Strings(out)
-	return out, err
+	return dedup(out), err
+}
+
+func dedup(sorted []string) []string {
+	j, n := 0, len(sorted)
+	if n == 0 {
+		return []string{}
+	}
+
+	for i := 1; i < n; i++ {
+		if sorted[j] == sorted[i] {
+			continue
+		}
+		j++
+		sorted[j] = sorted[i]
+	}
+	return sorted[:j+1]
 }
