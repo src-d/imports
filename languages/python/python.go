@@ -1,8 +1,6 @@
 package python
 
 import (
-	"sync"
-
 	sitter "github.com/smacker/go-tree-sitter"
 	"github.com/smacker/go-tree-sitter/python"
 	"github.com/src-d/imports/languages/tsitter"
@@ -19,13 +17,13 @@ const (
 )
 
 var (
-	once sync.Once
 	q    *sitter.Query
 	qerr error
 )
 
 func init() {
 	tsitter.RegisterLanguage(language{})
+	q, qerr = sitter.NewQuery([]byte(query), python.GetLanguage())
 }
 
 type language struct{}
@@ -38,15 +36,14 @@ func (l language) GetLanguage() *sitter.Language {
 	return python.GetLanguage()
 }
 
-func (l language) Imports(content []byte, n *sitter.Node) ([]string, error) {
-	once.Do(func() { q, qerr = sitter.NewQuery([]byte(query), l.GetLanguage()) })
+func (l language) Imports(content []byte, root *sitter.Node) ([]string, error) {
 	if qerr != nil {
 		return nil, qerr
 	}
 
 	var out []string
 	c := sitter.NewQueryCursor()
-	c.Exec(q, n)
+	c.Exec(q, root)
 	for {
 		m, ok := c.NextMatch()
 		if !ok {

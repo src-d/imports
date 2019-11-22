@@ -22,8 +22,12 @@ func TestPythonImports(t *testing.T) {
 		},
 		{
 			Name: "named",
-			Src:  `import a.b as c`,
+			Src: `
+				import a.b as c
+				import A.B as C
+			`,
 			Exp: []string{
+				"A.B",
 				"a.b",
 			},
 		},
@@ -62,12 +66,23 @@ func TestPythonImports(t *testing.T) {
 				"...",
 			},
 		},
-		// We have to think how to fix it (maybe posprocess and get rid of aliases).
-		// So far we return `[a.b x]`
 		// {
 		// 	Name: "relative named",
-		// 	Src:  `from a.b import x as b`,
+		// 	Src: `
+		// 		from a.b import x as b
+		// 	`,
 		// 	Exp: []string{
+		// 		"a.b",
+		// 	},
+		// },
+		// {
+		// 	Name: "relative named",
+		// 	Src: `
+		// 		from a.b import x as b
+		// 		from A.B import X as B
+		// 	`,
+		// 	Exp: []string{
+		// 		"A.B",
 		// 		"a.b",
 		// 	},
 		// },
@@ -79,8 +94,11 @@ func TestPythonImports(t *testing.T) {
 			},
 		},
 		{
-			Name: "wildcard",
-			Src:  `from a.b import *`,
+			Name: "dedup",
+			Src: `
+			from a.b import foo,bar
+			from a.b import baz
+			`,
 			Exp: []string{
 				"a.b",
 			},
