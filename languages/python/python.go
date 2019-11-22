@@ -17,13 +17,16 @@ const (
 )
 
 var (
-	q    *sitter.Query
-	qerr error
+	q *sitter.Query
 )
 
 func init() {
 	tsitter.RegisterLanguage(language{})
-	q, qerr = sitter.NewQuery([]byte(query), python.GetLanguage())
+
+	var err error
+	if q, err = sitter.NewQuery([]byte(query), python.GetLanguage()); err != nil {
+		panic(err)
+	}
 }
 
 type language struct{}
@@ -37,10 +40,6 @@ func (l language) GetLanguage() *sitter.Language {
 }
 
 func (l language) Imports(content []byte, root *sitter.Node) ([]string, error) {
-	if qerr != nil {
-		return nil, qerr
-	}
-
 	var out []string
 	c := sitter.NewQueryCursor()
 	c.Exec(q, root)
