@@ -56,7 +56,25 @@ func TestCSharpImports(t *testing.T) {
 			Name: "named template",
 			Src:  `using f = Foo.Bar<int>;`,
 			Exp: []string{
-				"Foo.Bar<int>",
+				"Foo.Bar",
+			},
+		},
+		{
+			Name: "named template",
+			Src:  `using f = Foo.Bar /* comment */ <int> ;`,
+			Exp: []string{
+				"Foo.Bar",
+			},
+		},
+		{
+			Name: "named template",
+			Src: `
+			using MyStack = NameSpace.Stack<MyType>;
+			using MyPopAlias = NameSpace.Stack<MyType>.Pop;
+			`,
+			Exp: []string{
+				"NameSpace.Stack",
+				"NameSpace.Stack.Pop",
 			},
 		},
 		{
@@ -84,6 +102,10 @@ func TestCSharpImports(t *testing.T) {
 			// Using alias directive for a generic class.
 			using UsingAlias = NameSpace2.MyClass<int>;
 
+			using MyStack = NameSpace.Stack<MyType>;
+			using MyPopAlias = NameSpace.Stack<MyType>.Pop;
+
+			using f = Foo.Bar /* comment */ <int> ;
 
 			class Test {
 				static void main() {
@@ -95,8 +117,11 @@ func TestCSharpImports(t *testing.T) {
 			}
 			`,
 			Exp: []string{
+				"Foo.Bar",
+				"NameSpace.Stack",
+				"NameSpace.Stack.Pop",
 				"NameSpace1.MyClass",
-				"NameSpace2.MyClass<int>",
+				"NameSpace2.MyClass",
 				"System",
 				"System.Collections.Generic",
 				"System.Math",
