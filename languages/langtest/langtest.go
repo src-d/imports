@@ -28,7 +28,7 @@ func RunTest(t *testing.T, l imports.Language, cases []Case) {
 				return
 			}
 			if !reflect.DeepEqual(c.Exp, out) {
-				t.Fatal(out)
+				t.Fatalf("%q", out)
 			}
 		})
 	}

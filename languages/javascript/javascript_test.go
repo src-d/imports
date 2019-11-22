@@ -12,7 +12,7 @@ func TestJavaScriptImports(t *testing.T) {
 			Name: "simple",
 			Src:  `import 'file';`,
 			Exp: []string{
-				"./file",
+				"file",
 			},
 		},
 		{
@@ -26,35 +26,35 @@ func TestJavaScriptImports(t *testing.T) {
 			Name: "symbol",
 			Src:  `import foo from 'file';`,
 			Exp: []string{
-				"./file",
+				"file",
 			},
 		},
 		{
 			Name: "multiple symbols",
 			Src:  `import { foo, bar } from 'file';`,
 			Exp: []string{
-				"./file",
+				"file",
 			},
 		},
 		{
 			Name: "symbol aliases",
 			Src:  `import { foo as f, bar as b } from 'file';`,
 			Exp: []string{
-				"./file",
+				"file",
 			},
 		},
 		{
 			Name: "wildcard",
 			Src:  `import * as ns from 'file';`,
 			Exp: []string{
-				"./file",
+				"file",
 			},
 		},
 		{
 			Name: "type",
 			Src:  `import type Foo from 'file';`,
 			Exp: []string{
-				"./file",
+				"file",
 			},
 		},
 	})
