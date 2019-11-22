@@ -12,21 +12,21 @@ func TestJavaImports(t *testing.T) {
 			Name: "simple",
 			Src:  `import com.foo.bar;`,
 			Exp: []string{
-				"com/foo/bar",
+				"com.foo.bar",
 			},
 		},
 		{
 			Name: "static",
 			Src:  `import static com.foo.Bar;`,
 			Exp: []string{
-				"com/foo/Bar",
+				"com.foo.Bar",
 			},
 		},
 		{
 			Name: "wildcard",
 			Src:  `import com.foo.*;`,
 			Exp: []string{
-				"com/foo",
+				"com.foo.",
 			},
 		},
 		{
@@ -37,9 +37,9 @@ import com.foo.B;
 import com.foo.A;
 `,
 			Exp: []string{
-				"com/foo",
-				"com/foo/A",
-				"com/foo/B",
+				"com.foo.",
+				"com.foo.A",
+				"com.foo.B",
 			},
 		},
 	})

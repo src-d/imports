@@ -5,7 +5,6 @@ import (
 
 	sitter "github.com/smacker/go-tree-sitter"
 	"github.com/smacker/go-tree-sitter/java"
-	"github.com/src-d/imports"
 	"github.com/src-d/imports/languages/tsitter"
 )
 
@@ -57,10 +56,11 @@ func (l language) Imports(content []byte, n *sitter.Node) ([]string, error) {
 					name := content[c.StartByte():c.EndByte()]
 					parts = append(parts, string(name))
 				case "asterisk":
-					// we skip it, so instead of "a.b.*" we return an "a.b" import
+					// we add an empty string, so instead of "a.b.*" we return an "a.b." import
+					parts = append(parts, "")
 				}
 			}
-			out = append(out, strings.Join(parts, imports.Separator))
+			out = append(out, strings.Join(parts, "."))
 		}
 	}
 	return out, nil
