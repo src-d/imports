@@ -15,6 +15,19 @@ const (
 
 var (
 	q *sitter.Query
+
+	// include filters
+	inFilters = map[string]struct{}{
+		"identifier_name": struct{}{},
+		".":               struct{}{},
+	}
+
+	// exclude filters
+	exFilters = map[string]struct{}{
+		"type_argument_list": struct{}{},
+		"<":                  struct{}{},
+		">":                  struct{}{},
+	}
 )
 
 func init() {
@@ -38,6 +51,7 @@ func (l language) GetLanguage() *sitter.Language {
 
 func (l language) Imports(content []byte, root *sitter.Node) ([]string, error) {
 	var out []string
+
 	c := sitter.NewQueryCursor()
 	c.Exec(q, root)
 	for {
@@ -47,10 +61,37 @@ func (l language) Imports(content []byte, root *sitter.Node) ([]string, error) {
 		}
 
 		for _, cap := range m.Captures {
-			str := string(content[cap.Node.StartByte():cap.Node.EndByte()])
-			out = append(out, str)
+			out = append(out, filter(content, cap.Node))
 		}
 	}
 
 	return out, nil
+}
+
+func filter(content []byte, node *sitter.Node) string {
+	var (
+		out string
+		fn  func(n *sitter.Node)
+	)
+
+	fn = func(n *sitter.Node) {
+		// try to include the whole node (identifiers)
+		if _, in := inFilters[n.Type()]; in {
+			str := string(content[n.StartByte():n.EndByte()])
+			out += str
+		} else {
+			// otherwise, try include children
+			cnt := int(n.ChildCount())
+			for i := 0; i < cnt; i++ {
+				// exclude the whole node if not interested
+				if _, ex := exFilters[n.Type()]; ex {
+					continue
+				}
+				fn(n.Child(i))
+			}
+		}
+	}
+
+	fn(node)
+	return out
 }
