@@ -1,0 +1,27 @@
+# github.com/davecgh/go-spew v1.1.0
+github.com/davecgh/go-spew/spew
+# github.com/pmezard/go-difflib v1.0.0
+github.com/pmezard/go-difflib/difflib
+# github.com/smacker/go-tree-sitter v0.0.0-20191120151204-b4adc5db3a99
+github.com/smacker/go-tree-sitter
+github.com/smacker/go-tree-sitter/golang
+github.com/smacker/go-tree-sitter/java
+github.com/smacker/go-tree-sitter/javascript
+github.com/smacker/go-tree-sitter/python
+# github.com/src-d/enry/v2 v2.1.0
+github.com/src-d/enry/v2
+github.com/src-d/enry/v2/data
+github.com/src-d/enry/v2/data/rule
+github.com/src-d/enry/v2/internal/tokenizer
+github.com/src-d/enry/v2/internal/tokenizer/flex
+github.com/src-d/enry/v2/regex
+# github.com/src-d/go-oniguruma v1.1.0
+github.com/src-d/go-oniguruma
+# github.com/stretchr/testify v1.4.0
+github.com/stretchr/testify/assert
+# github.com/toqueteos/trie v1.0.0
+github.com/toqueteos/trie
+# gopkg.in/toqueteos/substring.v1 v1.0.2
+gopkg.in/toqueteos/substring.v1
+# gopkg.in/yaml.v2 v2.2.2
+gopkg.in/yaml.v2
