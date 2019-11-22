@@ -6,10 +6,8 @@ To build the project from source, run:
 
 ```bash
 git clone https://github.com/src-d/imports.git
-git clone https://github.com/smacker/go-tree-sitter.git
 cd imports
-go mod edit -replace=github.com/smacker/go-tree-sitter=../go-tree-sitter
-go install ./cmd/sourced-imports
+GO111MODULE=off go build ./cmd/sourced-imports
 ```
 
 Usage example:
