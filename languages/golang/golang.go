@@ -10,6 +10,20 @@ func init() {
 	tsitter.RegisterLanguage(language{})
 }
 
+const query = `
+(import_spec (interpreted_string_literal) @name)
+`
+
+var q *sitter.Query
+
+func init() {
+	var err error
+	q, err = sitter.NewQuery([]byte(query), golang.GetLanguage())
+	if err != nil {
+		panic(err)
+	}
+}
+
 type language struct{}
 
 func (language) Aliases() []string {
@@ -22,25 +36,17 @@ func (l language) GetLanguage() *sitter.Language {
 
 func (l language) Imports(content []byte, n *sitter.Node) ([]string, error) {
 	var out []string
-	tsitter.EachNodeTypes(n, func(n *sitter.Node) bool {
-		c := n.Child(1)
-		if c != nil && c.Type() == "import_spec_list" {
-			n = c
+	c := sitter.NewQueryCursor()
+	c.Exec(q, n)
+	for {
+		m, ok := c.NextMatch()
+		if !ok {
+			break
 		}
-		for i := 0; i < int(n.ChildCount()); i++ {
-			n := n.Child(i)
-			if n.Type() != "import_spec" {
-				continue
-			}
-			for j := 0; j < int(n.ChildCount()); j++ {
-				n := n.Child(j)
-				if n.Type() != "interpreted_string_literal" {
-					continue
-				}
-				out = append(out, string(content[n.StartByte()+1:n.EndByte()-1]))
-			}
+		for _, c := range m.Captures {
+			str := string(content[c.Node.StartByte()+1 : c.Node.EndByte()-1])
+			out = append(out, str)
 		}
-		return false
-	}, "import_declaration")
+	}
 	return out, nil
 }
