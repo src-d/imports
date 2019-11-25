@@ -1,6 +1,7 @@
 package tsitter
 
 import (
+	"runtime"
 	"sort"
 
 	sitter "github.com/smacker/go-tree-sitter"
@@ -34,6 +35,7 @@ func (l language) Imports(content []byte) ([]string, error) {
 	p.SetLanguage(l.l.GetLanguage())
 	tree := p.Parse(content)
 	out, err := l.l.Imports(content, tree.RootNode())
+	runtime.KeepAlive(p)
 	sort.Strings(out)
 	return dedup(out), err
 }
