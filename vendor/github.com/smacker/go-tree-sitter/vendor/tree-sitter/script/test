@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+
+set -e
+
+function usage {
+  cat <<-EOF
+USAGE
+
+  $0 [-adDg] [-s SEED] [-l LANGUAGE] [-e EXAMPLE] [-t TRIAL]
+
+OPTIONS
+
+  -h  Print this message
+
+  -a  Compile C code with the Clang static analyzer
+
+  -l  Run only the corpus tests for the given language
+
+  -e  Run only the corpus tests whose name contain the given string
+
+  -t  Run only the given trial number of randomized test
+
+  -s  Set the seed used to control random behavior
+
+  -d  Print parsing log to stderr
+
+  -D  Generate an SVG graph of parsing logs
+
+  -g  Run the tests with a debugger
+
+EOF
+}
+
+export TREE_SITTER_TEST=1
+export RUST_TEST_THREADS=1
+export RUST_BACKTRACE=full
+
+mode=normal
+
+while getopts "dDghl:e:s:t:" option; do
+  case ${option} in
+    h)
+      usage
+      exit
+      ;;
+    l)
+      export TREE_SITTER_TEST_LANGUAGE_FILTER=${OPTARG}
+      ;;
+    e)
+      export TREE_SITTER_TEST_EXAMPLE_FILTER=${OPTARG}
+      ;;
+    t)
+      export TREE_SITTER_TEST_TRIAL_FILTER=${OPTARG}
+      ;;
+    s)
+      export TREE_SITTER_TEST_SEED=${OPTARG}
+      ;;
+    d)
+      export TREE_SITTER_TEST_ENABLE_LOG=1
+      ;;
+    D)
+      export TREE_SITTER_TEST_ENABLE_LOG_GRAPHS=1
+      ;;
+    g)
+      mode=debug
+      ;;
+  esac
+done
+
+shift $(expr $OPTIND - 1)
+
+if [[ -n $TREE_SITTER_TEST_LANGUAGE_FILTER || -n $TREE_SITTER_TEST_EXAMPLE_FILTER || -n $TREE_SITTER_TEST_TRIAL_FILTER ]]; then
+  top_level_filter=corpus
+else
+  top_level_filter=$1
+fi
+
+if [[ "${mode}" == "debug" ]]; then
+  test_binary=$(
+    cargo test -p tree-sitter-cli --no-run --message-format=json 2> /dev/null |\
+    jq -rs 'map(select(.target.name == "tree-sitter-cli" and .executable))[0].executable'
+  )
+  lldb "${test_binary}" -- $top_level_filter
+else
+  cargo test -p tree-sitter-cli --jobs 1 $top_level_filter -- --nocapture
+fi
