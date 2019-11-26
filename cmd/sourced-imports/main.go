@@ -10,9 +10,10 @@ import (
 )
 
 var (
-	fRoot = flag.String("root", ".", "root directory with the analyzed project")
-	fRel  = flag.String("rel", "", "a directory relative to the root to analyze (recursively)")
-	fNum  = flag.Int("n", 0, "max allowed concurrency (0 means use the number of CPUs)")
+	fRoot    = flag.String("root", ".", "root directory with the analyzed project")
+	fRel     = flag.String("rel", "", "a directory relative to the root to analyze (recursively)")
+	fNum     = flag.Int("n", 0, "max allowed concurrency (0 means use the number of CPUs)")
+	fSymLink = flag.Bool("sym-links", false, "allow sym-links traversal")
 )
 
 func main() {
@@ -25,8 +26,9 @@ func main() {
 
 func run() error {
 	e := imports.NewExtractor(imports.Config{
-		Out: os.Stdout,
-		Num: *fNum,
+		Out:      os.Stdout,
+		Num:      *fNum,
+		SymLinks: *fSymLink,
 	})
 	return e.Extract(*fRoot, *fRel)
 }

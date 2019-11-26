@@ -21,6 +21,9 @@ type Config struct {
 	// For files larger than this, only a sample of this size will be used for language detection.
 	// Library may use the sample to try extracting imports, or may return an empty list of imports.
 	MaxSize int64
+	// SymLinks is option that allows traversal over sym-links, be aware of potentials loops
+	// if false - all symlinks will be skipped
+	SymLinks bool
 }
 
 // NewExtractor creates an extractor with a given configuration. See Config for more details.
@@ -35,9 +38,10 @@ func NewExtractor(c Config) *Extractor {
 		c.MaxSize = 1 * 1024 * 1024
 	}
 	return &Extractor{
-		enc:     json.NewEncoder(c.Out),
-		num:     c.Num,
-		maxSize: c.MaxSize,
+		enc:      json.NewEncoder(c.Out),
+		num:      c.Num,
+		maxSize:  c.MaxSize,
+		symLinks: c.SymLinks,
 	}
 }
 
@@ -48,9 +52,10 @@ type File struct {
 }
 
 type Extractor struct {
-	enc     *json.Encoder
-	num     int // TODO(dennwc): use it!
-	maxSize int64
+	enc      *json.Encoder
+	num      int // TODO(dennwc): use it!
+	maxSize  int64
+	symLinks bool
 }
 
 // Extract imports recursively from a given directory. The root is a root of the project's repository and rel is the
@@ -69,7 +74,24 @@ func (e *Extractor) Extract(root, rel string) error {
 		if err != nil {
 			return err
 		}
-		return e.processFile(fname, path, sample)
+		if info.Mode()&os.ModeSymlink == 0 {
+			return e.processFile(fname, path, sample)
+		}
+		if !e.symLinks {
+			return nil
+		}
+		dstPath, err := filepath.EvalSymlinks(path)
+		if err != nil {
+			return err
+		}
+
+		dst, err := filepath.Rel(root, dstPath)
+		if err != nil {
+			return err
+		}
+
+		// TODO(lwsanty): infinite loop detection
+		return e.Extract(root, dst)
 	})
 }
 

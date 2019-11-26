@@ -4,6 +4,7 @@ github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZb
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/smacker/go-tree-sitter v0.0.0-20191120151204-b4adc5db3a99 h1:bFL5CorAtndjjOhp41I9uyQ9W4fIa4k7aJC+fqdbZqk=
 github.com/smacker/go-tree-sitter v0.0.0-20191120151204-b4adc5db3a99/go.mod h1:EiUuVMUfLQj8Sul+S8aKWJwQy7FRYnJCO2EWzf8F5hk=
+github.com/smacker/go-tree-sitter v0.0.0-20191125232205-55fb68a723c8 h1:Ysj2N8AMf/1cTT8q0fwIOkwQ2E78bxqsEyTqb2KWI1Y=
 github.com/src-d/enry/v2 v2.1.0 h1:z1L8t+B8bh3mmjPkJrgOTnVRpFGmTPJsplHX9wAn6BI=
 github.com/src-d/enry/v2 v2.1.0/go.mod h1:qQeCMRwzMF3ckeGr+h0tJLdxXnq+NVZsIDMELj0t028=
 github.com/src-d/go-oniguruma v1.1.0 h1:EG+Nm5n2JqWUaCjtM0NtutPxU7ZN5Tp50GWrrV8bTww=
