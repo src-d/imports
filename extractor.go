@@ -14,6 +14,35 @@ import (
 	"github.com/src-d/enry/v2"
 )
 
+// Extract imports from a given file content, assuming it had a given path.
+//
+// The path is used for language detection only. It won't access any files locally and won't fetch dependency manifests
+// as Extract may do.
+//
+// The function does no sampling for the file, it means if the file size is large, it may take a lot of time to parse
+// it or even detect the language. Instead, passing a part of the file may be an option.
+func Extract(path string, content []byte) (*File, error) {
+	lang := enry.GetLanguage(path, content)
+	f := &File{Path: path, Lang: lang}
+	if lang == enry.OtherLanguage {
+		// unknown language - skip
+		return f, nil
+	}
+	l := LanguageByName(lang)
+	if l == nil {
+		// emit the file-language mapping; no imports
+		return f, nil
+	}
+	// import extraction
+	list, err := l.Imports(content)
+	if err != nil {
+		return f, err
+	}
+	sort.Strings(list)
+	f.Imports = list
+	return f, nil
+}
+
 type Config struct {
 	// Out is a destination to write JSON output to during Extract.
 	Out io.Writer
@@ -58,7 +87,7 @@ type Extractor struct {
 	mu  sync.Mutex
 	enc *json.Encoder
 
-	num     int
+	num      int
 	maxSize  int64
 	symLinks bool
 }
@@ -166,25 +195,7 @@ func (e *Extractor) Extract(root, rel string) error {
 // The path is used for language detection only. It won't access any files locally and won't fetch dependency manifests
 // as Extract may do.
 func (e *Extractor) ExtractFrom(path string, content []byte) (*File, error) {
-	lang := enry.GetLanguage(path, content)
-	f := &File{Path: path, Lang: lang}
-	if lang == enry.OtherLanguage {
-		// unknown language - skip
-		return f, nil
-	}
-	l := LanguageByName(lang)
-	if l == nil {
-		// emit the file-language mapping; no imports
-		return f, nil
-	}
-	// import extraction
-	list, err := l.Imports(content)
-	if err != nil {
-		return f, err
-	}
-	sort.Strings(list)
-	f.Imports = list
-	return f, nil
+	return Extract(path, content)
 }
 
 func (e *Extractor) worker(jobs <-chan *extractJob, errc chan<- error) {
