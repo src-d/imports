@@ -1,6 +1,7 @@
 package imports
 
 import (
+	"context"
 	"encoding/json"
 	"io"
 	"io/ioutil"
@@ -8,6 +9,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"sort"
+	"time"
 
 	"github.com/src-d/enry/v2"
 )
@@ -24,6 +26,8 @@ type Config struct {
 	// SymLinks is option that allows traversal over sym-links, be aware of potentials loops
 	// if false - all symlinks will be skipped
 	SymLinks bool
+
+	Timeout time.Duration
 }
 
 // NewExtractor creates an extractor with a given configuration. See Config for more details.
@@ -37,11 +41,15 @@ func NewExtractor(c Config) *Extractor {
 	if c.MaxSize == 0 {
 		c.MaxSize = 1 * 1024 * 1024
 	}
+	if c.Timeout == 0 {
+		c.Timeout = time.Second
+	}
 	return &Extractor{
 		enc:      json.NewEncoder(c.Out),
 		num:      c.Num,
 		maxSize:  c.MaxSize,
 		symLinks: c.SymLinks,
+		timeout:  c.Timeout,
 	}
 }
 
@@ -49,6 +57,7 @@ type File struct {
 	Path    string   `json:"file"`
 	Lang    string   `json:"lang,omitempty"`
 	Imports []string `json:"imports,omitempty"`
+	Error   string   `json:"error,omitempty"`
 }
 
 type Extractor struct {
@@ -56,6 +65,7 @@ type Extractor struct {
 	num      int // TODO(dennwc): use it!
 	maxSize  int64
 	symLinks bool
+	timeout  time.Duration
 }
 
 // Extract imports recursively from a given directory. The root is a root of the project's repository and rel is the
@@ -111,13 +121,18 @@ func (e *Extractor) ExtractFrom(path string, content []byte) (*File, error) {
 		// emit the file-language mapping; no imports
 		return f, nil
 	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), e.timeout)
+	defer cancel()
+
 	// import extraction
-	list, err := l.Imports(content)
-	if err != nil {
-		return f, err
+	if list, err := l.Imports(ctx, content); err != nil {
+		f.Error = err.Error()
+	} else {
+		sort.Strings(list)
+		f.Imports = list
 	}
-	sort.Strings(list)
-	f.Imports = list
+
 	return f, nil
 }
 

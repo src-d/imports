@@ -1,6 +1,7 @@
 package tsitter
 
 import (
+	"context"
 	"sort"
 
 	sitter "github.com/smacker/go-tree-sitter"
@@ -29,13 +30,32 @@ func (l language) Aliases() []string {
 	return l.l.Aliases()
 }
 
-func (l language) Imports(content []byte) ([]string, error) {
-	p := sitter.NewParser()
-	p.SetLanguage(l.l.GetLanguage())
-	tree := p.Parse(content)
-	out, err := l.l.Imports(content, tree.RootNode())
-	sort.Strings(out)
-	return dedup(out), err
+func (l language) Imports(ctx context.Context, content []byte) ([]string, error) {
+	var (
+		out []string
+		err error
+
+		done = make(chan struct{})
+	)
+
+	go func() {
+		defer close(done)
+
+		p := sitter.NewParser()
+		p.SetLanguage(l.l.GetLanguage())
+		tree := p.Parse(content)
+		out, err = l.l.Imports(content, tree.RootNode())
+		sort.Strings(out)
+		out = dedup(out)
+	}()
+
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+
+	case <-done:
+		return out, err
+	}
 }
 
 func dedup(sorted []string) []string {

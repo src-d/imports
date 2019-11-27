@@ -1,6 +1,7 @@
 package langtest
 
 import (
+	"context"
 	"reflect"
 	"testing"
 
@@ -20,7 +21,7 @@ func RunTest(t *testing.T, l imports.Language, cases []Case) {
 			if c.Skip {
 				t.SkipNow()
 			}
-			out, err := l.Imports([]byte(c.Src))
+			out, err := l.Imports(context.TODO(), []byte(c.Src))
 			if err != nil {
 				t.Fatal(err)
 			}

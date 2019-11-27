@@ -1,10 +1,12 @@
 package imports
 
+import "context"
+
 const Separator = "/"
 
 type Language interface {
 	Aliases() []string
-	Imports(content []byte) ([]string, error)
+	Imports(ctx context.Context, content []byte) ([]string, error)
 }
 
 var (
