@@ -3,13 +3,6 @@ language: go
 go:
   - '1.13.x'
 
-services:
-  - docker
-
-env:
-  global:
-    - GO111MODULE=off
-
 go_import_path: github.com/src-d/imports
 
 script:
